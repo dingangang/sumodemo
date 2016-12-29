@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>BAIDU</title>
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=kFxygnwq99AWyTwS2uisUS2ebTwveZoM" type="text/javascript"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style type="text/css">
+        html{height:2000px}
+        body{height:100%;margin:0;padding:0;}
+        #container{position: relative;width: 100%;}
+        #control{width: 200px;
+            height: 150px;
+            display: none;
+            position: absolute;
+            left: 2px;
+            top: 500px;
+            text-align: center;
+            padding: 20px 10px;
+            background: #E6E6E6;
+            box-shadow:8px 8px 8px #252525;
+            -webkit-box-shadow:8px 8px 8px #252525;
+            border-radius: 10px}
+        .search-close{
+            position: absolute;
+            right: 6px;
+            top: 6px;
+        }
+        .modal-body{
+            text-align: center;
+        }
+        .busline-result{
+
+            width: 80%;
+            text-align: left;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        ol{list-style-type:none;counter-reset:sectioncounter;}
+        ol li{display:block;width:100%;text-align: left;margin-top: 10px}
+        ol li:before {
+            content:counter(sectioncounter) "、";
+            counter-increment:sectioncounter;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container"></div>
+<div id="control">
+    <button type="button" class="close" ><span class="search-close" aria-hidden="true" onclick="hideSearch()" >&times;</span><span class="sr-only">Close</span></button>
+    <p>在这里输入公交线路：</p>
+    <input  class="form-control" type="text">
+    <button class="btn btn-success" id="search" data-toggle="modal" data-target="#myModal" style="margin-top: 15px">搜索</button>
+    <button class="btn btn-warning" id="clear"  style="margin-top: 15px" onclick=map.clearOverlays()>清除路线</button>
+</div>
+<div id="result"></div>
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">搜索结果</h4>
+            </div>
+            <div class="modal-body">
+                <p>One fine body&hellip;</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script type="text/javascript">
+    var map = new BMap.Map("container");          // 创建地图实例
+    var point = new BMap.Point(112.974079,28.239595);  // 创建点坐标
+    map.centerAndZoom(point, 14);                 // 初始化地图，设置中心点坐标和地图级别
+    map.addControl(new BMap.NavigationControl()); //添加控件导航条
+    map.addControl(new BMap.ScaleControl());        //比例尺控件
+    map.addControl(new BMap.OverviewMapControl());  //缩略图控件
+    map.addControl(new BMap.MapTypeControl());      //地图类型控件
+    //map.enableScrollWheelZoom();                    // 开启滑轮支持
+    map.setCurrentCity("长沙");
+
+    // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
+//    以上是设定地图的基础界面
+//
+    //1、物件类
+//
+//    function addMarker(point, index){  // 创建图标对象
+//
+//        var marker = new BMap.Marker(point); //创建标注
+//        marker.addEventListener("click", function(e){
+//            var opts = {
+//                width : 250,     // 信息窗口宽度
+//                height: 100,     // 信息窗口高度
+//                title : "Hello"  // 信息窗口标题
+//            }
+//            var infoWindow = new BMap.InfoWindow("World", opts);  // 创建信息窗口对象
+//            map.openInfoWindow(infoWindow,new BMap.Point(e.point.lng,e.point.lat));      // 打开信息窗口
+//        });
+//        marker.enableDragging();//拖拽功能
+//        marker.addEventListener("dragend", function(e){
+//            alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+//        })
+//        map.addOverlay(marker);  //将标注添加到地图中
+//    }
+//    // 随机向地图添加10个标注
+//    var bounds = map.getBounds();
+//    bounds.maxX = bounds.Ee;
+//    bounds.minX = bounds.Je;
+//    bounds.maxY = bounds.De;
+//    bounds.minY = bounds.Ie;
+//    var lngSpan = bounds.maxX - bounds.minX;
+//    var latSpan = bounds.maxY - bounds.minY;
+//    console.log(bounds);
+//    console.log(lngSpan);
+//    console.log(latSpan);
+//    for (var i = 0; i < 10; i ++) {
+//        var point = new BMap.Point(bounds.minX + lngSpan * (Math.random() * 0.7 + 0.15),
+//                bounds.minY + latSpan * (Math.random() * 0.7 + 0.15));
+//        console.log(point);
+//        addMarker(point, i);
+//    }
+    //以上是添加标注点的部分
+//
+////折线
+//    var polyline = new BMap.Polyline([
+//                new BMap.Point(112.974079,28.199595),
+//                new BMap.Point(112.954079,28.199595)
+//            ],
+//            {strokeColor:"blue", strokeWeight:1, strokeOpacity:1}
+//    );
+//    map.addOverlay(polyline);
+//
+////自定义覆盖物
+//    // 定义自定义覆盖物的构造函数
+//    function SquareOverlay(center, length, color){
+//        this._center = center;
+//        this._length = length;
+//        this._color = color;
+//    }
+//    // 继承API的BMap.Overlay
+//    SquareOverlay.prototype = new BMap.Overlay();
+//
+//    // 实现初始化方法
+//    SquareOverlay.prototype.initialize = function(map){
+//// 保存map对象实例
+//        this._map = map;
+//        // 创建div元素，作为自定义覆盖物的容器
+//        var div = document.createElement("div");
+//        div.style.position = "absolute";
+//        // 可以根据参数设置元素外观
+//        div.style.width = this._length + "px";
+//        div.style.height = this._length + "px";
+//        div.style.background = this._color;
+//// 将div添加到覆盖物容器中
+//        map.getPanes().markerPane.appendChild(div);
+//// 保存div实例
+//        this._div = div;
+//// 需要将div元素作为方法的返回值，当调用该覆盖物的show、
+//// hide方法，或者对覆盖物进行移除时，API都将操作此元素。
+//        return div;
+//    }
+//    // 实现绘制方法
+//    SquareOverlay.prototype.draw = function(){
+//// 根据地理坐标转换为像素坐标，并设置给容器
+//        var position = this._map.pointToOverlayPixel(this._center);
+//        this._div.style.left = position.x - this._length / 2 + "px";
+//        this._div.style.top = position.y - this._length / 2 + "px";
+//    }
+//    // 实现显示方法
+//    SquareOverlay.prototype.show = function(){
+//        if (this._div){
+//            this._div.style.display = "";
+//        }
+//    }
+//
+//    var mySquare = new SquareOverlay(map.getCenter(), 100, "red");//创建自定义对象
+//    map.addOverlay(mySquare);//将自定义覆盖物添加到地图
+// 2、图层
+ //   var traffic = new BMap.TrafficLayer();        // 创建交通流量图层实例
+//    map.addTileLayer(traffic);                    // 将图层添加到地图上
+//
+//    setTimeout(function () {
+//        map.removeTileLayer(traffic) //移除交通层
+//    },3000)
+    //本地搜索
+//    var local = new BMap.LocalSearch(map, {
+//        renderOptions: {map: map,autoViewport: true,panel: "results"},pageCapacity: 100
+//    });
+//    local.search("905路");
+
+
+
+    //！！！公共交通部分 (此部分出错了)
+//    var transit = new BMap.TransitRoute("长沙市");
+//    transit.setSearchCompleteCallback(function(results){
+//        console.log(results);
+//        if (transit.getStatus() == BMAP_STATUS_SUCCESS){
+//            var firstPlan = results.getPlan(0);
+//            // 绘制步行线路
+//            for (var i = 0; i < firstPlan.getNumRoutes(); i ++){
+//                var walk = firstPlan.getRoute(i);
+//                if (walk.getDistance(false) > 0){
+//                    // 步行线路有可能为0
+//                    map.addOverlay(new BMap.Polyline(walk.getPoints(), {lineColor: "green"}));
+//                }
+//            }
+//            // 绘制公交线路
+//            for (i = 0; i < firstPlan.getNumLines(); i ++){
+//                var line = firstPlan.getLine(i);
+//                map.addOverlay(new BMap.Polyline(line.getPoints()));
+//            }
+//            // 输出方案信息
+//            var s = [];
+//            for (i = 0; i < results.getNumPlans(); i ++){
+//                s.push((i + 1) + ". " + results.getPlan(i).getDescription());
+//            }
+//            document.getElementById("log").innerHTML = s.join("<br>");
+//        }
+//    })
+//    transit.search("科教新村", "五一广场");
+
+    var buslineSearch = new BMap.BusLineSearch("长沙市",{
+        onGetBusListComplete : function (rs) { //rs:BusListResult
+            busListResult = rs;
+            var modal_html ="<ol>";
+            for(var i=0;i<rs.getNumBusList();i++){
+                console.log(rs.getBusListItem(i).name);
+                modal_html += "<li><a class='busline-result' onclick=getBuslineDetail("+i+")>"+rs.getBusListItem(i).name+"</a></li>"
+            }
+            modal_html += "</ol>";
+            $(".modal-body").html(modal_html);
+        },
+        onPolylinesSet: function () {
+            alert("done")
+        },
+        onGetBusLineComplete:function (rs) {
+            console.log(rs.getPolyline());
+            var ply = rs.getPolyline();
+            ply.setStrokeWeight(2);
+            ply.setStrokeColor("red");
+            map.addOverlay(rs.getPolyline());
+        }
+    });
+
+    var busListResult;
+
+    //var result = buslineSearch.getBusList("立珊专线"); //搜索，指向onGetBusListComplete
+
+
+
+</script>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    //获取公交路线详细信息并在地图中显示
+
+    function getBuslineDetail(i) {
+        console.log(i);
+
+        var temp = buslineSearch.getBusLine(busListResult.getBusListItem(i)); //获取线路信息，指向onGetBusLineComplete
+    }
+
+$(function () {
+    //设定地图高度
+    var height = $(window).height().toString();
+    $("#container").css('height',height);
+
+    //左下搜索栏延时显示
+    setTimeout(function () {
+        $("#control").slideDown();
+    },3000);
+
+    //隐藏搜索栏
+    function hideSearch() {
+        $("#control").slideUp();
+    }
+
+    //搜索线路，获取搜索结果并在模态框中展示
+    $("#search").click(function () {
+        var keyword = $("#control input").val();
+        var result = buslineSearch.getBusList(keyword); //搜索，指向onGetBusListComplete
+
+    });
+
+
+
+
+
+
+
+})
+
+</script>
+</body>
+</html>
