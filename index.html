@@ -242,6 +242,18 @@
         },
         onGetBusLineComplete:function (rs) {
             console.log(rs.getPolyline());
+            console.log("BusStationNumber: "+rs.getNumBusStations());
+            var busStations = [];
+            for(var i=0;i<rs.getNumBusStations();i++){
+                console.log(rs.getBusStation(i).name);
+                busStations.push(rs.getBusStation(i).position);
+                var circle = new BMap.Circle(rs.getBusStation(i).position,10,{strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5}); //创建圆
+                map.addOverlay(circle);            //增加圆
+            }
+//            var busStationsPly = new BMap.Polyline(busStations);
+//            busStationsPly.setStrokeColor("green");
+//            map.addOverlay(busStationsPly); 折线测试
+            console.log(busStations);
             var ply = rs.getPolyline();
             ply.setStrokeWeight(2);
             ply.setStrokeColor("red");
